@@ -2,9 +2,15 @@ import { useState } from 'react'
 
 const Button=({text,onClick})=><button onClick={onClick}>{text}</button>;
 
+const StatisticLine=({text,value})=><tr><td>{text}</td> <td>{value}</td></tr>
+
 const Statistics=({stats})=>{
 
-  if(stats.reduce((a,c)=>a+c)==0){
+  const totalFeedback=stats.reduce((a,c)=>a+c)
+  const average=(stats[0]-stats[2])/totalFeedback
+  const positive=(stats[0])/totalFeedback*100
+
+  if(totalFeedback==0){
       return (
       <>
       <h1>Statistics</h1>
@@ -15,16 +21,15 @@ const Statistics=({stats})=>{
   return(
     <>
     <h1>Statistics</h1>
-    good:{stats[0]}
-    <br/>
-    neutral:{stats[1]}
-    <br/>
-    bad:{stats[2]}
-
+    <table>
+    <StatisticLine text="good" value={stats[0]}/>
+    <StatisticLine text="neutral" value={stats[1]}/>
+    <StatisticLine text="bad" value={stats[2]}/>
+    <StatisticLine text="all" value={totalFeedback}/>
+    <StatisticLine text="average" value={average}/>
+    <StatisticLine text="positive" value={positive.toString()+"%"}/>
+    </table>
     </>
-
-  
-
   )
 }
 
