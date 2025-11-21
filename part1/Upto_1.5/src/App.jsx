@@ -1,9 +1,35 @@
+import { useState } from "react"
 
 const Header=(props)=>{
   console.log(props)
   return (
     <h1>{props.course}</h1>
   )
+}
+
+const Counter=()=>{
+ const [count,setCount]=useState(0)
+
+ const handleClick=()=>{
+  console.log("clicked!",count)
+  setCount(count+1)
+
+ }
+  
+
+
+  return <>
+    counter:{count}
+    <button onClick={()=>handleClick()}>PLUS</button>
+    <button onClick={()=>setCount(0)}>ZERO</button>
+  </>
+
+
+
+
+
+
+
 }
 const Part=(props)=>{
   console.log(props,"PART")
@@ -47,6 +73,7 @@ const App = () => {
       <Header course={course}/>
       <Content parts={parts}/>
       <Total parts={parts}/>
+      <Counter/>
     </div>
   )
 }
