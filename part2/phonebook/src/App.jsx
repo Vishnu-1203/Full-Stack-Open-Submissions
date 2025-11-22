@@ -3,20 +3,18 @@ import Persons from './components/persons'
 import Filter from './components/filter'
 import Form from './components/form'
 import { useEffect } from 'react'
-import axios from "axios"
+
+import phonebookServices from './services/phonebook'
 
 const App = () => {
    const [persons, setPersons] = useState([])
 
   useEffect(()=>{
-    axios.get("http://localhost:3001/persons")
-    .then(response=>{
-      console.log(response.data,"effect")
-      setPersons(response.data)
+    phonebookServices.getAll().then(res=>{
+      console.log(res)
+      setPersons(res)
     })
-
-  }
-    ,[])
+  },[])
   const [newName, setNewName] = useState('')
   const [number,setNumber]=useState('')
   const [useFilter,SetUseFilter]=useState(false)
@@ -24,16 +22,44 @@ const App = () => {
 
   const handlePhonebookUpdate=(e)=>{
     e.preventDefault()
-    if(!persons.find(ele=>ele.name===newName)){
-    const newPerson=[{name:newName, number:number, id:persons.length+1}]
-
-    setPersons(persons.concat(newPerson))
-    console.log(persons)
+    const personFound=persons.find(ele=>ele.name===newName)
+    if(!personFound){
+      const newPerson={name:newName, number:number, id:(persons.length+1).toString()}
+      phonebookServices.addPerson(newPerson).then(res=>{
+        setPersons(persons.concat(res))
+        console.log(res)
+      }).catch(e=>console.log("failed adding cuz of",e))       
   }
   else{
-    alert(`${newName} already added to persons!`)
+    if(personFound.number!=number){
+      if(confirm(`${newName} is already added to Phonebook, replace the old number with new one?`)){
+        const newPerson={...personFound,number:number}
+        phonebookServices.updatePersonNumber(personFound.id,newPerson).then(res=>{
+          console.log(`updating succesful! for ${res.name}`)
+          setPersons(persons.map(person=>person.id==personFound.id?newPerson:person))
+
+        }).catch(e=>console.log(`updating number ${personFound.name} failed due to ${e}`))
+      }
+      
+    }else{
+        alert("Number provided is also same, No change possible")
+        console.log("Number provided is also same, No change possible")
+      }
   }
   }
+
+  const deletePerson=(id,name)=>{
+    if(confirm(`Delete ${name}?`)){
+    phonebookServices.deletePersonWithId(id).then(res=>{
+      console.log("succesfully deleted!",res)
+      setPersons(persons.filter(person=>person.id!=id))
+    }).catch("Deletion Failed!, for id ",id)
+  }
+  else{
+    console.log("not deleting")
+  }
+  }
+
   const handleNumberChange=(e)=>{
     console.log(e.target.value)
     setNumber(e.target.value)
@@ -63,7 +89,7 @@ const App = () => {
       <h2>add a new</h2>
       <Form handleNameChange={handleNameChange} handleNumberChange={handleNumberChange} handlePhonebookUpdate={handlePhonebookUpdate}/>
       <h2>Numbers</h2>
-      <Persons currentPersons={currentPersons}/>
+      <Persons currentPersons={currentPersons} deletePerson={deletePerson}/>
     </div>
   )
 }
