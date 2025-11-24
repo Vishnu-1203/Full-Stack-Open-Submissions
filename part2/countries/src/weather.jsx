@@ -15,7 +15,6 @@ const Weather = ({lat,lon}) => {
 
   if(!weather)return null;
     const iconUrl = `https://openweathermap.org/img/wn/01d@2x.png`
-    console.log(iconUrl,"url")
   return (
     <div>
 

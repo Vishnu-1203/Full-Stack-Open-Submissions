@@ -1,0 +1,13 @@
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+
+
+
+
+
+
+{
+    "id": "3",
+    "content": "HTML is not",
+    "important": true
+}
