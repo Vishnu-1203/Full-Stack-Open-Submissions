@@ -1,18 +1,14 @@
 const express=require("express")
 const app=express()
 const morgan=require("morgan")
+const cors=require("cors")
 app.use(express.json())
-app.use(morgan("tiny"))
+app.use(cors())
+morgan.token('body', function (req, res) { return JSON.stringify(req.body)})
+app.use(morgan(`:method :url :status :res[content-length] - :response-time ms :body `))
 
 const PORT=3001
-const requestLogger = (request, response, next) => {
-  console.log('Method:', request.method)
-  console.log('Path:  ', request.path)
-  console.log('Body:  ', request.body)
-  console.log('---')
-  next()
-}
-app.use(requestLogger)
+
 
 const generateId=()=>{
     const id=Math.floor(Math.random()*50000000)
@@ -45,7 +41,7 @@ let phonebook=[
 
 app.get("/api/persons",(request,response)=>{
     console.log(request.body)
-    response.json(phonebook).end()
+    response.json(phonebook)
 })
 
 app.get("/info",(request,response)=>{

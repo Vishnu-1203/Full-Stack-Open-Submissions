@@ -1,6 +1,8 @@
 const express=require("express")
 const app=express()
-const PORT=3001
+const cors=require("cors")
+const PORT=process.env.PORT
+app.use(cors())
 app.use(express.json())
 let notes = [
   {
