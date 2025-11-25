@@ -22,11 +22,15 @@ const App = () => {
     const [notification,setNotification]=useState(null)
 
     const [messageType,setMessageType]=useState('notification')
+
+    let currentPersons=useFilter?persons.filter(ele=>(ele.name).toLowerCase().startsWith(filter.toLowerCase())):persons;
+
+
     const handlePhonebookUpdate=(e)=>{
     e.preventDefault()
     const personFound=persons.find(ele=>ele.name===newName)
     if(!personFound){
-      const newPerson={name:newName, number:number, id:(persons.length+1).toString()}
+      const newPerson={name:newName, number:number}
       phonebookServices.addPerson(newPerson).then(res=>{
         setPersons(persons.concat(res))
         console.log(res)
@@ -59,6 +63,7 @@ const App = () => {
 
     const deletePerson=(id,name)=>{
       if(confirm(`Delete ${name}?`)){
+        console.log("trying to delete of id:",id,name)
       phonebookServices.deletePersonWithId(id).then(res=>{
         console.log("succesfully deleted!",res)
         setPersons(persons.filter(person=>person.id!=id))
@@ -85,15 +90,16 @@ const App = () => {
       setNewName(e.target.value)
     }
     const handleFilter=(e)=>{
+      console.log("filter:",e.target.value)
+      setFilter(e.target.value)
       if(filter===""){
         SetUseFilter(false)
       }
       else{
       SetUseFilter(true)
     }
-    setFilter(e.target.value)
+    
     }
-    const currentPersons=useFilter?persons.filter(ele=>(ele.name).toLowerCase().startsWith(filter.toLowerCase())):persons;
     return (
       <div>
         <h2>Phonebook</h2>

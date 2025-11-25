@@ -1,5 +1,6 @@
 const express=require("express")
 const app=express()
+require("dotenv").config()
 const morgan=require("morgan")
 const cors=require("cors")
 app.use(express.json())
@@ -11,85 +12,88 @@ app.use(morgan(`:method :url :status :res[content-length] - :response-time ms :b
 
 const PORT=process.env.PORT||3001
 
+const Phonebook=require("./models/phonebook")
+let length=0
 
-const generateId=()=>{
-    const id=Math.floor(Math.random()*50000000)
-    console.log("max id is ",id+1)
-    return String(id+1)
-}
-
-let phonebook=[
-    { 
-      "id": "1",
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": "2",
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": "3",
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": "4",
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
-
-app.get("/api/persons",(request,response)=>{
+app.get("/api/persons",(request,response,next)=>{
     console.log(request.body)
-    response.json(phonebook)
+    Phonebook.find({}).then(result=>{
+      length=result.length
+      response.json(result)
+    }).catch(e=>next(e))
 })
 
 app.get("/info",(request,response)=>{
     const currentTime=new Date()
     console.log(request.body)
-    response.send(`<p>Phonebook has info for ${phonebook.length} people.</p>
+    response.send(`<p>Phonebook has info for ${length} people.</p>
         ${currentTime}
         `)
 })
-app.get("/api/persons/:id",(request,response)=>{
+
+app.get("/api/persons/:id",(request,response,next)=>{
     const id=request.params.id
-    const person=phonebook.find(p=>p.id===id)
-    if(!person){
-        return response.status(404).json({error:"user does not exist"})
-    }
-    response.json(person)
+    console.log("find by id",id)
+    Phonebook.findById(id).then(result=>{
+      console.log(result," result")
+      response.json(result)}).catch(e=>next(e))
+    
 })
 
-app.delete("/api/persons/:id",(request,response)=>{
+app.delete("/api/persons/:id",(request,response,next)=>{
     const id=request.params.id
-    phonebook=phonebook.filter(p=>p.id!=id)
-    console.log(phonebook,"after deleted of ",id)
-    response.status(204).end()
+    console.log(id,typeof(id))
+    Phonebook.findByIdAndDelete(id).then(result=>{
+      console.log("Deleted! :",result)
+      return response.status(204).end()
+    }).catch(e=>next(e))
 })
 
-app.post("/api/persons",(request,response)=>{
+app.put("/api/persons/:id",(request,response,next)=>{
+  Phonebook.findById(request.params.id).then(person=>{
+     if (!person) {
+        return response.status(404).end()
+      }
+    console.log("found person for updating:",person)
+    
+    person.name=request.body.name
+    person.number=request.body.number
+
+    person.save().then(res=>{
+      console.log("updated!",res)
+      return response.status(200).json(res)
+    }).catch(e=>next(e))
+
+  })
+})
+
+app.post("/api/persons",(request,response,next)=>{
     const body=request.body
 
 
     if(!body.name)return response.status(400).json({error:"name is missing"});
     if(!body.number)return response.status(400).json({error:"number is missing"});
+  
 
-    const person=phonebook.find(p=>p.name==body.name)
-    if(person)return response.status(400).json({error:"person already exists"});
+    const newPerson=new Phonebook({name:body.name,number:body.number})
 
-    const newPerson={id:generateId(),name:body.name,number:String(body.number)}
-    phonebook=phonebook.concat(newPerson)
-
-    response.json(newPerson)
+    newPerson.save().then(result=>{
+      console.log("saved succesfully!")
+      return response.json(result)
+    }).catch(e=>next(e))
 
 })
 
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
+const errorHandler = (error,request, response,next) => {
+  console.error(error)
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+
 }
 
-app.use(unknownEndpoint)
+app.use(errorHandler)
 
 app.listen(PORT,()=>{console.log(`Listening in PORT:${PORT}`)})

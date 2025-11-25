@@ -12,12 +12,12 @@ const addPerson=(person)=>{
 }
 
 const deletePersonWithId=(id)=>{
-    const request=axios.delete(`${baseUrl}/${parseInt(id)}`)
+    const request=axios.delete(`${baseUrl}/${id}`)
     return request.then(res=>res.data)
 }
 
 const updatePersonNumber=(id,newObject)=>{
-    const request=axios.put(`${baseUrl}/${parseInt(id)}`,newObject)
+    const request=axios.put(`${baseUrl}/${id}`,newObject)
     return request.then(res=>res.data)
 }
 
