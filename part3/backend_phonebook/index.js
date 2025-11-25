@@ -1,8 +1,9 @@
 const express=require("express")
-const app=express()
 require("dotenv").config()
 const morgan=require("morgan")
 const cors=require("cors")
+const app=express()
+
 app.use(express.json())
 app.use(cors())
 app.use(express.static("dist"))
@@ -71,9 +72,7 @@ app.post("/api/persons",(request,response,next)=>{
     const body=request.body
 
 
-    if(!body.name)return response.status(400).json({error:"name is missing"});
-    if(!body.number)return response.status(400).json({error:"number is missing"});
-  
+
 
     const newPerson=new Phonebook({name:body.name,number:body.number})
 
@@ -89,6 +88,11 @@ const errorHandler = (error,request, response,next) => {
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
   } 
+  else if(error.name==="ValidationError"){
+
+    return response.status(400).json({error:error.message})
+
+  }
 
   next(error)
 

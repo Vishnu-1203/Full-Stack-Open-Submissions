@@ -27,39 +27,44 @@ const App = () => {
 
 
     const handlePhonebookUpdate=(e)=>{
-    e.preventDefault()
-    const personFound=persons.find(ele=>ele.name===newName)
-    if(!personFound){
-      const newPerson={name:newName, number:number}
-      phonebookServices.addPerson(newPerson).then(res=>{
-        setPersons(persons.concat(res))
-        console.log(res)
-        setMessageType('notification')
-        setNotification(`${res.name} Added!`)
-        setTimeout(()=>{setNotification(null)},3000)
-      }).catch(e=>console.log("failed adding cuz of",e))       
-    }
-    else{
-      if(personFound.number!=number){
-        if(confirm(`${newName} is already added to Phonebook, replace the old number with new one?`)){
-          const newPerson={...personFound,number:number}
-          phonebookServices.updatePersonNumber(personFound.id,newPerson).then(res=>{
-            console.log(`updating succesful! for ${res.name}`)
-            setPersons(persons.map(person=>person.id==personFound.id?newPerson:person))
-
-            setMessageType('notification')
-            setNotification(`${res.name} updated with number ${res.number}`)
-            setTimeout(()=>{setNotification(null)},3000)
-
-          }).catch(e=>console.log(`updating number ${personFound.name} failed due to ${e}`))
-        }
+      e.preventDefault()
+      const personFound=persons.find(ele=>ele.name===newName)
+      if(!personFound){
+        const newPerson={name:newName, number:number}
+        phonebookServices.addPerson(newPerson).then(res=>{
+          setPersons(persons.concat(res))
+          console.log(res)
+          setMessageType('notification')
+          setNotification(`${res.name} Added!`)
+          setTimeout(()=>{setNotification(null)},3000)
+        }).catch(e=>{
+          console.log("failed adding cuz of",e.response.data.error)
+          setNotification(e.response.data.error)
+          setTimeout(()=>{setNotification(null)},3000)
         
-      }else{
-          alert("Number provided is also same, No change possible")
-          console.log("Number provided is also same, No change possible")
-        }
-    }
-    }
+        })       
+      }
+      else{
+        if(personFound.number!=number){
+          if(confirm(`${newName} is already added to Phonebook, replace the old number with new one?`)){
+            const newPerson={...personFound,number:number}
+            phonebookServices.updatePersonNumber(personFound.id,newPerson).then(res=>{
+              console.log(`updating succesful! for ${res.name}`)
+              setPersons(persons.map(person=>person.id==personFound.id?newPerson:person))
+
+              setMessageType('notification')
+              setNotification(`${res.name} updated with number ${res.number}`)
+              setTimeout(()=>{setNotification(null)},3000)
+
+            }).catch(e=>console.log(`updating number ${personFound.name} failed due to ${e.response.data.error}`))
+          }
+          
+        }else{
+            alert("Number provided is also same, No change possible")
+            console.log("Number provided is also same, No change possible")
+          }
+      }
+      }
 
     const deletePerson=(id,name)=>{
       if(confirm(`Delete ${name}?`)){

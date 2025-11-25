@@ -11,9 +11,24 @@ mongoose.connect(url,{family:4}).then(result => {
     console.log('error connecting to MongoDB:', error.message)
   })
 
+const hypenated=(num)=>{
+  const newstr=num.substr(1,num.length-3)
+  const hyp=newstr.indexOf("-")
+  if(hyp==-1)return false;
+  return true
+}
 const phonebookSchema=mongoose.Schema({
-        name:String,
-        number:Number
+        name:{
+          type:String,
+          minLength:3,
+          required:true
+        },
+        number:{
+          type:String,
+          minLength:8,
+          required:true,
+          validate: [hypenated,"Error: Not Hyphenated into two parts"]
+        }
     })
 
 
