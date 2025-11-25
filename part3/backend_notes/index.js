@@ -1,6 +1,6 @@
-const express=require("express")
+const express=require('express')
 const app=express()
-const cors=require("cors")
+const cors=require('cors')
 require('dotenv').config()
 app.use(cors())
 app.use(express.json())
@@ -12,33 +12,33 @@ const PORT = process.env.PORT
 const Note = require('./models/note')
 
 
-app.get("/",(request,response)=>{
-    response.send('<h1>Hello World</h1>')
+app.get('/',(request,response) => {
+  response.send('<h1>Hello World</h1>')
 
 })
 app.get('/api/notes', (request, response) => {
-  console.log("get hit")
+  console.log('get hit')
   Note.find({}).then(notes => {
     console.log(notes)
     response.json(notes)
   })
 })
-app.get('/api/notes/:id', (request, response) => {
+app.get('/api/notes/:id', (request, response,next) => {
   Note.findById(request.params.id)
     .then(note => {
       if (note) {
         response.json(note)
       } else {
-        response.status(404).end() 
+        response.status(404).end()
       }
     })
-        .catch(error => next(error))
+    .catch(error => next(error))
 
 })
 app.delete('/api/notes/:id', (request, response, next) => {
   Note.findByIdAndDelete(request.params.id)
     .then(result => {
-      response.status(204).end()
+      response.status(204).json({ result }).end()
     })
     .catch(error => next(error))
 })
@@ -94,4 +94,4 @@ const errorHandler = (error, request, response, next) => {
 
 app.use(errorHandler)
 
-app.listen(PORT,()=>{console.log(`Running on port ${PORT}`)})
+app.listen(PORT,() => {console.log(`Running on port ${PORT}`)})
