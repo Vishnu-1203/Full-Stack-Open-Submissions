@@ -3,21 +3,25 @@ const assert=require("node:assert")
 const mongoose=require("mongoose")
 const supertest=require("supertest")
 const app=require("../app")
+const bcrypt=require("bcrypt")
 
 const helper=require("./blog_helper")
 const Blog=require("../models/blog")
+const User = require("../models/user")
 
 const api=supertest(app)
 
 beforeEach(async()=>{
     await Blog.deleteMany({})
     await Blog.insertMany(helper.initialBlogs)
+
+
+
 })
 
 test("Testing blogs GET/API",async()=>{
     let response=await api.get("/api/blogs").expect(200).expect('Content-Type', /application\/json/)
-    
-  
+
     assert.strictEqual(response.body.length,helper.initialBlogs.length)
 })
 
@@ -27,10 +31,13 @@ test("Testing for ID",async()=>{
     assert(blog.id)
     assert.strictEqual(undefined,blog._id)
   })
-
 })
 
 test("Testing Post works",async()=>{
+
+  const login=await api.post("/api/login").send({username:"user",password:"password"})
+
+
   const newBlog={
     title:"test1",
     author:"pas",
@@ -38,7 +45,7 @@ test("Testing Post works",async()=>{
     likes:838
   }
   const blogsAtStart=await helper.blogsInDb()
-  const response=await api.post("/api/blogs").send(newBlog)
+  const response=await api.post("/api/blogs").send(newBlog).set('Authorization',`Bearer ${login.body.token}`)
   const blogsAtEnd=await helper.blogsInDb()
   const result={
     title:response.body.title,
