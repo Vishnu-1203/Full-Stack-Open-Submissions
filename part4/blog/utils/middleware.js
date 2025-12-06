@@ -1,4 +1,5 @@
 const User=require("../models/user")
+const jwt=require("jsonwebtoken")
 
 const errorHandler = (error, request, response, next) => {
   if (error.name === 'MongoServerError' && error.message.includes('E11000')) {

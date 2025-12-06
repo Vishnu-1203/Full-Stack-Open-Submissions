@@ -19,7 +19,7 @@ app.use(express.json())
 
 app.use(tokenExtracter)
 
-app.use("/api/blogs",userExtractor,blogRouter)
+app.use("/api/blogs",blogRouter)
 app.use("/api/users",userRouter)
 app.use("/api/login",loginRouter)
 

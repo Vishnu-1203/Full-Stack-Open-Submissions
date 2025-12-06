@@ -2,6 +2,7 @@ const blogRouter=require("express").Router()
 const Blog=require("../models/blog")
 const User=require("../models/user")
 const jwt=require("jsonwebtoken")
+const {userExtractor}=require("../utils/middleware")
 
 
 blogRouter.get('/', async(request, response) => {
@@ -9,7 +10,7 @@ blogRouter.get('/', async(request, response) => {
   response.json(res)
 })
 
-blogRouter.post('/', async(request, response) => {
+blogRouter.post('/',userExtractor, async(request, response) => {
   const body=request.body
   
   if(request.body.likes===undefined)request.body.likes=0;
@@ -30,7 +31,7 @@ blogRouter.post('/', async(request, response) => {
   response.status(201).json(result)
 })
 
-blogRouter.delete("/:id",async(request,response)=>{
+blogRouter.delete("/:id",userExtractor,async(request,response)=>{
   const decodedToken=request.user
   
   const blog=await Blog.findById(request.params.id)
@@ -43,7 +44,7 @@ blogRouter.delete("/:id",async(request,response)=>{
 
 })
 blogRouter.put("/:id",async(request,response)=>{
-  let blog=await Blog.findById(request.params.id)
+  let blog=await Blog.findById(request.params.id).populate("user",{ username: 1, name: 1 })
 
   if(!blog)return response.status(404).json(blog)
   
